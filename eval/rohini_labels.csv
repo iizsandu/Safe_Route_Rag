@@ -1,0 +1,21 @@
+article_id,verdict,category,crime_type,note,revised_from,revised_why,revised_evidence
+122075852,relevant,crime scene,shooting,,,,
+119988730,not_relevant,,,,,,
+89719546,relevant,crime scene,,,,,
+81741137,relevant,,,,not_relevant,assistant revision from article text,"killed inside a flat at a housing society in Delhi's Rohini; Tulsi Apartment, Sector 14"
+107610684,not_relevant,,,,,,
+123857760,not_relevant,,,,,,
+126601515,relevant,firing,,,,,
+96995305,unclear,,,since crime did not take place in rohini,not_relevant,assistant revision: genuinely ambiguous,extortion CALL to a Rohini-based car dealer; article never says where the call was made from
+87378714,relevant,,,,,,
+86494441,relevant,,,,,,
+85770347,relevant,,,,,,
+84303161,relevant,,,,,,
+114156694,relevant,,,,not_relevant,assistant revision from article text,stabbing near Nirankari Bhawan in Rohini; headline names Vijay Vihar which is within Rohini
+91276970,not_relevant,,,,,,
+84294876,relevant,,,,not_relevant,assistant revision from article text,fake call centre operating at Rohini Sector-7; 24 arrested from Rohini area
+84643763,not_relevant,,,,,,
+95107053,relevant,,,,,,
+91994108,not_relevant,,,,,,
+108651858,relevant,,,,,,
+130965462,not_relevant,,,,,,

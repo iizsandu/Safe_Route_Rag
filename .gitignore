@@ -1,0 +1,26 @@
+# --- Data: 2.6 GB, never commit ---
+Data/
+processed/
+
+# NOTE: eval/ is deliberately NOT ignored.
+# Hand-authored labels are ground truth and must be versioned.
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# --- Secrets ---
+.env
+*.key
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+CLAUDE.md
+docs/

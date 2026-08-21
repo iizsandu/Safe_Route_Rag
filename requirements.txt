@@ -1,0 +1,12 @@
+# Safe Route RAG — dependencies
+#
+# This project deliberately has ZERO third-party dependencies.
+# Verified 2026-08-21: rag/ and scripts/ run in a bare virtualenv
+# on the Python 3.11.9 standard library alone.
+#
+# Anything added below must be justified BEFORE it appears in code
+# (CLAUDE.md §5): chosen / alternatives / why this / why not the
+# others / what we give up / revisit when.
+#
+# Anticipated, none adopted:
+#   nltk   - Porter stemmer, tokenizer arm B (D-008, D-009)

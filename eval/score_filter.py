@@ -15,6 +15,7 @@ import csv
 import json
 import re
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -70,19 +71,40 @@ def extract_verdicts(reply: str) -> list[dict[str, Any]]:
     return parsed if isinstance(parsed, list) else []
 
 
-def load_predictions(directory: Path, model: str) -> dict[int, dict[str, str]]:
-    """Collect every verdict this model produced across all saved batches."""
-    predictions: dict[int, dict[str, str]] = {}
-    for path in sorted(directory.glob("*.json")):
+def load_predictions(
+    directory: Path,
+    model: str,
+    prompt_contains: str | None = None,
+    prompt_omits: str | None = None,
+) -> tuple[dict[str, dict[str, str]], list[str]]:
+    """Collect this model's verdicts, newest run wins. Returns (verdicts, runs).
+
+    Ordered by `requested_at`, NOT by filename. Filenames are content hashes,
+    so filename order is arbitrary -- sorting by it silently blended a Friday
+    run with a Monday run and produced a score belonging to neither. Prompt
+    variants are selected with prompt_contains / prompt_omits so an A/B
+    comparison can be scored without deleting anything.
+    """
+    records = []
+    for path in directory.glob("*.json"):
         if ".error-" in path.name:
             continue
         saved = json.loads(path.read_text(encoding="utf-8"))
         if saved.get("model") != model:
             continue
-        choices = (saved.get("response") or {}).get("choices") or []
-        if not choices:
+        prompt = saved.get("prompt") or ""
+        if prompt_contains and prompt_contains not in prompt:
             continue
-        reply = (choices[0].get("message") or {}).get("content") or ""
+        if prompt_omits and prompt_omits in prompt:
+            continue
+        if not ((saved.get("response") or {}).get("choices") or []):
+            continue
+        records.append((saved.get("requested_at") or "", path, saved))
+
+    predictions: dict[int, dict[str, str]] = {}
+    runs: set[str] = set()
+    for requested_at, path, saved in sorted(records, key=lambda r: r[0]):
+        reply = (saved["response"]["choices"][0].get("message") or {}).get("content") or ""
         for item in extract_verdicts(reply):
             try:
                 article_id = int(item["article_id"])
@@ -92,8 +114,11 @@ def load_predictions(directory: Path, model: str) -> dict[int, dict[str, str]]:
                 "verdict": normalise(item.get("verdict", "")),
                 "reason": (item.get("reason") or "").strip(),
                 "batch": path.name,
+                "requested_at": requested_at,
             }
-    return predictions
+    for prediction in predictions.values():
+        runs.add(prediction["requested_at"])
+    return predictions, sorted(runs)
 
 
 def load_headlines(path: Path) -> dict[int, str]:
@@ -195,6 +220,12 @@ def main() -> None:
                         help="Sample file, used only for headlines")
     parser.add_argument("--model", required=True,
                         help="Exact model string to score")
+    parser.add_argument("--prompt-contains", default=None,
+                        help="Only score responses whose prompt contains this "
+                             "text -- use it to isolate one prompt variant")
+    parser.add_argument("--prompt-omits", default=None,
+                        help="Only score responses whose prompt does NOT "
+                             "contain this text (the other side of an A/B)")
     args = parser.parse_args()
 
     if not args.labels.is_file():
@@ -203,9 +234,29 @@ def main() -> None:
         raise SystemExit(f"Not a directory: {args.responses}")
 
     labels = load_labels(args.labels)
-    predictions = load_predictions(args.responses, args.model)
+    predictions, runs = load_predictions(
+        args.responses, args.model, args.prompt_contains, args.prompt_omits
+    )
     if not predictions:
-        raise SystemExit(f"No saved responses found for model {args.model}")
+        raise SystemExit(f"No saved responses match model {args.model}")
+
+    # Batches within one invocation are seconds apart; separate experiments are
+    # not. Warn on a wide span, not on any difference -- a guard that cries wolf
+    # gets ignored, which is worse than no guard.
+    span_hours = 0.0
+    if len(runs) > 1:
+        first = datetime.fromisoformat(runs[0])
+        last = datetime.fromisoformat(runs[-1])
+        span_hours = (last - first).total_seconds() / 3600
+
+    if span_hours > 1:
+        print("WARNING: verdicts span", f"{span_hours:.1f} hours --", runs[0][:16], "to", runs[-1][:16])
+        print("  This score belongs to no single experiment. Narrow it with")
+        print("  --prompt-contains / --prompt-omits before reading anything.")
+        print("")
+    else:
+        print(f"run       : {runs[0][:19]}"
+              + (f" .. {runs[-1][11:19]}" if len(runs) > 1 else ""))
 
     report(labels, predictions, load_headlines(args.sample), args.model)
 

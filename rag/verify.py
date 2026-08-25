@@ -13,6 +13,7 @@ must not be shown to a user.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -128,6 +129,45 @@ def check_date_kinds(answer: Any, published: dict[int, str]) -> list[Finding]:
                     f"its publication date but labelled 'explicit'"))
     return findings
 
+DATE_EVIDENCE = re.compile(
+    r"\b(january|february|march|april|may|june|july|august|september|"
+    r"october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec|"
+    r"monday|tuesday|wednesday|thursday|friday|saturday|sunday|"
+    r"yesterday|today|tonight|\d{4})\b", re.I)
+
+
+def check_explicit_dates(answer: Any, texts: dict[int, str]) -> list[Finding]:
+    """An "explicit" date requires the article to contain SOME date reference.
+
+    date_kind "explicit" claims the article prints a date. If the source has no
+    month name, no weekday and no year anywhere, that claim cannot be true --
+    and rag/render.py prints it as "(stated in the article)", attributing a
+    fabrication to a real source with a real citation beside it.
+
+    Article 122075852 says only "Two weeks after armed men fired...". The model
+    returned 2025-06-25 -- its own publication date -- labelled "explicit".
+
+    Deliberately conservative: fires only when the article has NO date evidence
+    at all, so an article that does mention dates never false-alarms here. The
+    weaker "explicit date equals the publication date" case stays a WARNING in
+    check_date_kinds.
+    """
+    findings = []
+    for incident in answer.incidents:
+        if incident.get("date_kind") != "explicit":
+            continue
+        for source in incident.get("sources") or []:
+            text = texts.get(source, "")
+            if text and not DATE_EVIDENCE.search(text):
+                findings.append(Finding(
+                    "explicit-date", ERROR,
+                    f"article {source}: date_kind 'explicit' but the source "
+                    f"contains no date reference at all -- no month, weekday or "
+                    f"year. {incident.get('incident_date')!r} is fabricated, and "
+                    f"the renderer would present it as stated by the source."))
+    return findings
+
+
 def verify(answer: Any, records: list[dict[str, Any]]) -> list[Finding]:
     """Run every free check. Returns findings, most severe first."""
     published = {r["article_id"]: (r.get("published_at") or "")[:10]
@@ -141,7 +181,8 @@ def verify(answer: Any, records: list[dict[str, Any]]) -> list[Finding]:
                 + check_reconciliation(answer)
                 + check_vocabulary(answer)
                 + check_date_kinds(answer, published)
-                + check_relative_phrases(answer, texts))
+                + check_relative_phrases(answer, texts)
+                + check_explicit_dates(answer, texts))
 
     return sorted(findings, key=lambda f: f.severity != ERROR)
 

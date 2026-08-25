@@ -133,11 +133,15 @@ def verify(answer: Any, records: list[dict[str, Any]]) -> list[Finding]:
     published = {r["article_id"]: (r.get("published_at") or "")[:10]
                  for r in records}
 
+    texts = {r["article_id"]: ((r.get("headline") or "") + " " +
+                               (r.get("body_text") or "")) for r in records}
+    
     findings = (check_citations_exist(answer)
                 + check_claims_cited(answer)
                 + check_reconciliation(answer)
                 + check_vocabulary(answer)
-                + check_date_kinds(answer, published))
+                + check_date_kinds(answer, published)
+                + check_relative_phrases(answer, texts))
 
     return sorted(findings, key=lambda f: f.severity != ERROR)
 
@@ -157,3 +161,30 @@ def report(findings: list[Finding]) -> bool:
 
     return not errors
 
+def check_relative_phrases(answer: Any, texts: dict[int, str]) -> list[Finding]:
+    """A "relative" date phrase must actually appear in its source article.
+
+    date_kind "relative" means the phrase was COPIED from the article. If it is
+    not there, the model invented it -- and rag/dates.py will faithfully convert
+    the invention into a precise date, which reads as more reliable than the
+    guess it came from. Article 122075852 has no weekday word anywhere in its
+    body; the model returned "friday", which resolved to 2025-06-20.
+
+    Free and certain: a substring search over text we already hold.
+    """
+    findings = []
+    for incident in answer.incidents:
+        if incident.get("date_kind") != "relative":
+            continue
+        phrase = str(incident.get("incident_date") or "").strip().lower()
+        if not phrase:
+            continue
+        for source in incident.get("sources") or []:
+            text = texts.get(source, "").lower()
+            if text and phrase not in text:
+                findings.append(Finding(
+                    "relative-phrase", ERROR,
+                    f"article {source}: date phrase {phrase!r} does not appear "
+                    f"in the source. The model invented it, and dates.py will "
+                    f"resolve it to a specific day."))
+    return findings

@@ -14,10 +14,12 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
+from datetime import date
 
 from rag.context import build_context
 from rag.llm import ModelConfig, complete
 from rag.verify import report, verify
+from rag.render import render
 
 INSTRUCTIONS = """You are reading news articles to find crimes that happened at a specific
 place, using ONLY the numbered sources below.
@@ -285,6 +287,13 @@ def main() -> None:
     print("VERIFICATION")
     if not report(verify(answer, records)):
         raise SystemExit("  ANSWER NOT SAFE TO SHOW -- verification failed")
+
+    print()
+    print("=" * 60)
+    print(render(answer.incidents, args.area,
+                 date(*map(int, args.searched_from.split("-"))),
+                 date(*map(int, args.searched_to.split("-"))),
+                 records))
 
 
 if __name__ == "__main__":

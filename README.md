@@ -9,6 +9,8 @@ assaulted near this place? It's a RAG system over Indian crime news (Times of
 India, 2021–2026). It retrieves real articles and summarizes them, with
 every claim linked back to its source.
 
+![Safe Route landing page](assets/landing-page.png)
+
 It does not give you a safety score. That's on purpose.
 
 Article counts measure newsworthiness, not danger. They reflect where a
@@ -48,6 +50,8 @@ alone on Indian place names. BM25's tokenizer shreds names like
 *Sakthikulangara* into meaningless pieces, and dense embeddings lose
 precision on common ones. Measured on a held-out labeled set: BM25 alone hit
 10% precision@10, dense alone 60%, fused together close to 100%.
+
+![A sample answer with sources](assets/sample-answer.png)
 
 Article text lives in DynamoDB, not in Qdrant. It didn't start that way. The
 first version stored full article text as payload on every vector chunk, and

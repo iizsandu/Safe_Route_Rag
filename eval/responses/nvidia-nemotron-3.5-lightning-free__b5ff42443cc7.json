@@ -1,0 +1,47 @@
+{
+  "model": "nvidia/nemotron-3.5-lightning:free",
+  "label": "understand",
+  "tuning": {
+    "max_tokens": 16000,
+    "reasoning": {
+      "effort": "none"
+    },
+    "temperature": 0
+  },
+  "requested_at": "2026-08-29T16:11:40.632390+00:00",
+  "prompt": "You turn a user's question into search parameters for a crime-news\narchive. You do NOT answer the question.\n\nTODAY IS 2026-08-29. The archive covers 2021-01-01 to 2026-08-29.\n\nReturn ONLY this JSON object:\n\n{\"places\": [\"Area, City\"],\n  \"from\": \"YYYY-MM-DD\" or null,\n  \"to\": \"YYYY-MM-DD\" or null,\n  \"needs_city\": [\"Area\"],\n  \"unclear\": false}\n\nRULES\n\n1. places -- every location the user named, each as \"Area, City\".\n   A route (\"Rohini to Saket\") is TWO places, both listed.\n\n2. NEVER invent a city. If the user names an area without a city, put the\n   area in `needs_city` and NOT in `places`. A wrong city returns confident\n   results about somewhere the user did not mean.\n   \"Rohini, Delhi\"  -> places\n   \"Rohini\"         -> needs_city\n\n3. from / to -- only if the user gave a time. \"last 6 months\" counts,\n   \"recently\" does not. Use null when they gave none. Never guess.\n\n4. unclear: true when the user named no place at all. Then places and\n   needs_city are both empty.\n\n5. Do not answer the question, summarise, or add commentary.\n\nUSER QUESTION:\nIs it safe around Rohini, Delhi?",
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "role": "assistant",
+          "content": "{\"places\": [\"Rohini, Delhi\"], \"from\": null, \"to\": null, \"needs_city\": [], \"unclear\": false}"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 346,
+      "completion_tokens": 33,
+      "total_tokens": 379,
+      "cost": 0,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0,
+        "upstream_inference_prompt_cost": 0,
+        "upstream_inference_completions_cost": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  }
+}

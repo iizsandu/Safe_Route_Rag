@@ -1,0 +1,22 @@
+{
+  "model": "nvidia/nemotron-3.5-lightning:free",
+  "label": "understand",
+  "tuning": {
+    "max_tokens": 16000,
+    "reasoning": {
+      "effort": "none"
+    },
+    "temperature": 0
+  },
+  "requested_at": "2026-08-30T09:57:22.569425+00:00",
+  "prompt": "You turn a user's question into search parameters for a crime-news\narchive. You do NOT answer the question.\n\nTODAY IS 2026-08-30. The archive covers 2021-01-01 to 2026-08-29.\n\nReturn ONLY this JSON object:\n\n{\"places\": [\"Area, City\"],\n  \"from\": \"YYYY-MM-DD\" or null,\n  \"to\": \"YYYY-MM-DD\" or null,\n  \"needs_city\": [\"Area\"],\n  \"asking_about\": \"place_safety\" | \"a_person\" | \"something_else\",\n  \"unclear\": false}\n\nRULES\n\n1. places -- every location the user named, each as \"Area, City\".\n   A route (\"Rohini to Saket\") is TWO places, both listed.\n\n2. NEVER invent a city. If the user names an area without a city, put the\n   area in `needs_city` and NOT in `places`. A wrong city returns confident\n   results about somewhere the user did not mean.\n   \"Rohini, Delhi\"  -> places\n   \"Rohini\"         -> needs_city\n\n3. from / to -- only if the user gave a time. \"last 6 months\" counts,\n   \"recently\" does not. Use null when they gave none. Never guess.\n\n4. asking_about -- what the user WANTS.\n\n   \"place_safety\"    crime, safety or incidents at a place.\n                     \"is it safe around X\", \"crime in X\",\n                     \"what happened in X\", \"X to Y at night\".\n\n   \"a_person\"        the question is about a named individual.\n                     \"is Rajesh Kumar a criminal\", \"was my neighbour\n                     arrested\". Choose this even if a place is also named.\n\n   \"something_else\"  anything else -- cafes, directions, weather,\n                     arithmetic, recipes.\n\n   A place name does NOT make it \"place_safety\".\n   \"cafe near Rohini, Delhi\" is \"something_else\".\n\n5. unclear: true when the user named no place at all. Then places and\n   needs_city are both empty.\n\n6. Do not answer the question, summarise, or add commentary.\n\nUSER QUESTION:\nis rajesh kumar of rohini, delhi a criminal?",
+  "response": {
+    "error": {
+      "code": 504,
+      "message": "Upstream idle timeout exceeded",
+      "metadata": {
+        "error_type": "timeout"
+      }
+    }
+  }
+}

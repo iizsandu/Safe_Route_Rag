@@ -54,11 +54,24 @@ def format_when(incident: dict[str, Any], published: date) -> str:
     stated is still REPORTED, with the gap made explicit. Omitting it would
     hide a real crime; hedging from the publication date would be the exact
     trap D-011 warns about, wearing a hedge.
+
+    THREE states, not two (F-074). Collapsing the middle one into "not stated"
+    made this renderer assert something false about a source: article 84510053
+    said "Friday night", `dates.py` could not resolve it because WEEKDAYS is an
+    exact lookup, and the reader was told the date was not stated. Source
+    provenance is a hard requirement (CLAUDE.md section 9), and the component
+    that exists to protect it was the one breaking it.
     """
-    resolved, how = resolve(incident.get("incident_date"),
-                            incident.get("date_kind"), published)
+    stated = incident.get("incident_date")
+    resolved, how = resolve(stated, incident.get("date_kind"), published)
+
     if resolved:
         return f"{pretty(resolved)}  ({how})"
+    if stated and incident.get("date_kind") != "not_stated":
+        # The source DID say when. We failed to turn it into a date, and say so
+        # rather than blaming the source for our parser.
+        return (f"source says {str(stated)!r}, which we could not resolve to a "
+                f"date; article published {pretty(published)}")
     return f"date not stated; article published {pretty(published)}"
 
 def render_incident(

@@ -1,0 +1,22 @@
+{
+  "model": "nvidia/nemotron-3.5-lightning:free",
+  "label": "probe",
+  "tuning": {
+    "max_tokens": 16000,
+    "reasoning": {
+      "effort": "none"
+    },
+    "temperature": 0
+  },
+  "requested_at": "2026-08-28T19:27:16.338653+00:00",
+  "prompt": "Say OK",
+  "response": {
+    "error": {
+      "code": 504,
+      "message": "The operation was aborted",
+      "metadata": {
+        "error_type": "timeout"
+      }
+    }
+  }
+}

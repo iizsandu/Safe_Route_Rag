@@ -10,6 +10,7 @@ exact set of IDs that were sent, and re-deriving it elsewhere lets the two drift
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -19,7 +20,14 @@ SOURCE_CLOSE = "=== END SOURCE {number} ==="
 # A body containing our own delimiter could close a source block early and have
 # the rest of its text read as instructions. Retrieved text is untrusted data
 # (CLAUDE.md section 9), so the marker is neutralised wherever it appears.
-FORBIDDEN_IN_TEXT = "=== SOURCE", "=== END SOURCE"
+#
+# An exact-string match ("=== SOURCE") was tried first and measured broken:
+# "===SOURCE" (no space), "=== source" (lowercase) and "===  SOURCE  ==="
+# (extra spacing) all passed through untouched -- three trivial rewrites of
+# the same attack. All three still needed the fence: a run of "=" characters.
+# Matching the fence itself, not the words inside it, catches the family
+# rather than one string.
+EQUALS_RUN = re.compile(r"={3,}")
 
 EMPTY_BODY_MARKER = "(no body text in the corpus for this article)"
 
@@ -42,10 +50,10 @@ class Context:
         return len(self.text)
 
 def neutralise_markers(text: str) -> str:
-    """Defang any source delimiter appearing inside article text."""
-    for marker in FORBIDDEN_IN_TEXT:
-        text = text.replace(marker, marker.replace("=", "-"))
-    return text
+    """Defang any run of 3+ '=' characters -- the fence every source
+    delimiter is built from, whatever wording, case or spacing surrounds it.
+    """
+    return EQUALS_RUN.sub(lambda match: "-" * len(match.group()), text)
 
 def format_source(number: int, record: dict[str, Any]) -> str:
     """Render one article as a delimited source block (D-017)."""

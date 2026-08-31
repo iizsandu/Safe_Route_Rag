@@ -10,3 +10,12 @@
 #
 # Anticipated, none adopted:
 #   nltk   - Porter stemmer, tokenizer arm B (D-008, D-009)
+
+
+fastapi
+uvicorn[standard]
+python-multipart
+qdrant-client
+sentence-transformers
+numpy
+boto3

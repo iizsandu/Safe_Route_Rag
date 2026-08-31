@@ -1,0 +1,55 @@
+article_id,bm25_rank,dense_rank,verdict,why,headline
+117841203,1,252,not_relevant,"Kejriwal letter to EC; New Delhi constituency, no Rohini incident","Arvind Kejriwal writes to EC, demands appointment of independent observers in New Delhi constituency"
+128370798,199,1,relevant,,Man shot dead in Delhi's Rohini; gang war angle suspected
+84499222,135,2,relevant,,Wanted criminal held in Delhi's Rohini
+117859387,2,493,not_relevant,"AAP van attack, New Delhi; not Rohini",Arvind Kejriwal says AAP van attacked; Delhi Police request formal complaint
+86494441,3,103,not_relevant,"CJI reacts to the Rohini court shootout -- a reaction, not the incident",CJI N V Ramana expresses serious concern over shootout in Delhi
+87356274,34,3,relevant,,"One criminal killed in encounter in Delhi's Rohini, 2 cops injured"
+86476548,4,7,relevant,,Shootout at Rohini court in Delhi: How it happened
+83155043,28,4,not_relevant,storm fells trees; not a crime,"Late-night storm fells over 80 trees, outer and south Delhi worst hit"
+133142274,5,171,not_relevant,weather/traffic roundup,"49mm rain, traffic chaos, Sawan Shivratri rush, political rivals at wedding reception: What is trending in Delhi today"
+106412623,54,5,not_relevant,judge retires; not an incident,Nirbhaya gang-rape case judge retires from HC
+117828395,6,326,not_relevant,MLA attacked at Rithala rally; Rohini is the HOSPITAL (F-044),"AAP MLA Mohinder Goyal attacked during rally in Delhi, accuses BJP of orchestrating assault"
+84510053,244,6,relevant,,Delhi: Gangster aide held after shootout in Rohini
+111807281,7,725,not_relevant,robbery in Telangana,Delhi police arrest man for looting 4 kgs gold from jeweller in Telangana
+99272871,8,316,not_relevant,"gangster remanded at Patiala House, not Rohini",Delhi court sends gangster Deepak 'Boxer' to 8-day police custody
+123466709,116,8,not_relevant,peaceful dog-shelter protest; not a crime,Delhi: Peaceful protest in Rohini over alleged poor treatment of dogs at shelter
+90325263,305,9,not_relevant,faked robbery in Civil Lines; Rohini is the accused's HOME (F-044),Delhi: Driver held from Rohini for faking robbery of Rs 20 lakh
+90525253,9,396,not_relevant,assembly proceedings,Two BJP MLAs marshalled out of Delhi assembly for the day
+89855368,80,10,relevant,,Juvenile apprehended for killing woman in Delhi's Rohini
+110344136,10,19,not_relevant,election issues piece; no incident,"Lok Sabha polls: Delhi voters focus more on street crime, traffic woes, better infra"
+114389415,206,11,relevant,,Blast in Delhi: Explosion reported outside CRPF school in Rohini
+93966255,11,21,relevant,,"Delhi: Police arrest 2 drug traffickers in Rohini, recover heroin worth Rs 2 crore"
+114402419,12,201,not_relevant,political reaction to the blast,Centre unable to maintain law and order in Delhi: AAP on school blast
+97044600,418,12,relevant,,Woman injured in celebratory firing in Delhi's Rohini
+114436480,13,256,not_relevant,political reaction to the blast,"People are afraid to step out of their homes, says Bharadwaj; BJP hits back"
+98672065,30,13,not_relevant,electrical fire at a police station; not a crime,"Fire breaks out at cyber crime police station in Delhi's Rohini, none injured"
+95386767,41,14,relevant,,Delhi: Ex-serviceman working in school goes missing from Rohini
+115774385,14,205,not_relevant,political attack on Amit Shah,'Amit Shah has made Delhi a gangster and extortion capital': Arvind Kejriwal
+103760434,15,68,relevant,,Two brothers held with heroin worth Rs 1 cr from Delhi's Rohini
+102755393,587,15,relevant,,4 held for theft at Rohini temple
+93241825,16,280,not_relevant,actor interview,"Abhilash Thapliyal: For me, the most exciting thing in Delhi was to have chuski or barf ka gola"
+131428078,727,16,not_relevant,"Rohini ACHARYA, a person, in Patna -- name collision (F-047)","Now, Rohini challenges govt tovacate Rabri bungalow by force"
+113435743,147,17,relevant,,"Cops intensify patrolling in Rohini, arrest 27, detain 613"
+99572070,17,377,not_relevant,Mumbai cyber fraud,"Fraudster who duped Mumbai man of Rs 72,000 held in Delhi"
+122097323,18,382,not_relevant,drug destruction at Jahangirpuri,Delhi Police destroys illicit drugs worth more than 3k crore
+121997116,486,18,not_relevant,cyber fraud in Jaipur,2 Nepalese among 4 held for cyber fraud
+127641933,19,294,not_relevant,electricity theft statistics,Lust For Power: 1.5k Convicted In 4 Years
+95650748,20,434,not_relevant,Chhawla case review petition,Delhi LG VK Saxena okays review petition against acquittal of Chhawla gang rape and murder accused
+122864981,21,20,not_relevant,"rescue in Shakurpur, not Rohini",Four minor girls rescued from ‘placement agency’ in Delhi in joint police operation
+113269392,655,22,relevant,,Neighbour held for raping girl in Rohini
+94887787,22,155,not_relevant,insurance study naming Rohini theft-prone; no incident,‘3 Delhi areas most vehicle theft-prone zones in NCR’
+87193403,23,497,not_relevant,SUV thefts routed to Bihar,Stolen SUVs from Delhi being used to get around Bihar’s liquor ban
+111780320,168,23,relevant,,"Youth stabbed to death in Delhi's Rohini area, 3 held"
+90021782,335,24,relevant,,Delhi: Two women held for ruckus at police station in Rohini
+100614993,24,357,not_relevant,Shahbad Dairy murder; Rohini is the COURT (F-044),Sakshi murder case: Accused Sahil sent to 2-day police custody
+80464400,25,231,not_relevant,farmer tractor rally,"Tractor rally: Farmers protest intensifies, gates of several Delhi Metro stations closed"
+126103063,472,25,relevant,,"Delhi shocker: Over Rs 2,000 loan dispute, teen stabbed multiple times in neck in Rohini; two arrested"
+86487985,133,26,relevant,,"Rohini court shootout: Shots fired within minutes, seemed like terror attack, recall witnesses"
+116237306,26,189,not_relevant,political jibe,'Criminals no longer fear law & order': AAP's 'Mogambo' jibe at Amit Shah
+87378714,279,27,relevant,,Delhi Police gun down shooter of Gogi gang in Rohini
+94076494,27,353,not_relevant,DCW summons over a video,DCW issues summons to Delhi Police over video showing children selling liquor
+121521478,455,28,relevant,,Six arrested in Rs 10 Lakh heist in Delhi's Rohini
+88349040,29,34,not_relevant,Lok Adalat on electricity theft,Delhi: Tata Power to conduct Lok Adalat on theft cases
+86591090,627,29,not_relevant,"court security review after the shootout, not the incident","The verdict: Security upped at Delhi's Rohini court, chinks remain"
+102049371,327,30,relevant,,"Disgusted with nothing to steal, gang leaves Rs 500 at techie's house in Delhi"

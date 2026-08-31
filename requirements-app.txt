@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+python-multipart
+qdrant-client
+sentence-transformers
+numpy
+boto3

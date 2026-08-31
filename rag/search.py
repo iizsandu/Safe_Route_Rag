@@ -40,6 +40,95 @@ def inverse_document_frequency(doc_count: int, doc_containing: int) -> float:
     """
     return math.log(1+ (doc_count - doc_containing + 0.5)/(doc_containing + 0.5))
 
+@dataclass(frozen=True)
+class TermStrength:
+    """What one query term is worth, before any article is scored."""
+
+    term: str
+    doc_containing: int
+    idf: float
+    max_contribution: float
+    in_index: bool
+
+@dataclass(frozen=True)
+class ScoreCeiling:
+    """The highest score ANY article could reach for this query."""
+
+    query: str
+    terms: list[TermStrength]
+    ceiling: float
+
+    @property
+    def unknown_terms(self) -> list[str]:
+        """Terms absent from the index. They contribute exactly nothing."""
+        return [term.term for term in self.terms if not term.in_index]
+
+    @property
+    def anchor(self) -> TermStrength | None:
+        """The strongest single term -- what actually makes a query searchable.
+
+        F-064: the SUM rewards word count, so "bus stop" (16.84) outranks
+        "Rohini" (12.28) while locating nothing -- two mediocre words beat one
+        good one. What discriminates is whether ONE term is rare enough to pin
+        down a small set of articles.
+
+        Reported ALONGSIDE `ceiling`, not instead of it. The sum is still the
+        true upper bound on any article's score; it is simply the wrong thing
+        to gate on.
+
+        None when no query term is in the index at all.
+        """
+        known = [term for term in self.terms if term.in_index]
+        return max(known, key=lambda term: term.idf) if known else None
+
+def score_ceiling(index: InvertedIndex, query: str) -> ScoreCeiling:
+    """The highest score any article could possibly reach for this query.
+
+    Computable BEFORE searching: it needs only how many documents contain each
+    query term, which the index already holds. No postings are scored and no
+    document is read.
+
+    Where 2.5 comes from. One term contributes
+
+        idf * tf * (K1 + 1) / (tf + K1 * normalizer)
+
+    As tf grows this approaches idf * (K1 + 1) = idf * 2.5 and never reaches
+    it. Repetition saturates (F-043), so a term can never be worth more than
+    2.5 x its idf however often an article repeats it. Document length changes
+    how fast the limit is approached, never the limit itself -- which is why
+    the ceiling needs no document lengths.
+
+    A LOW ceiling means every article in the corpus is packed into a narrow
+    band. The gaps that then decide the ranking are set by document length
+    rather than relevance (F-047), so the top 5 are arbitrary while still
+    looking like a ranking.
+
+    This function REPORTS. It deliberately applies no threshold: none has been
+    measured yet, and inventing one here would bury a guess inside a library.
+    """
+    # Same de-duplication as search(), for the same reason: "rohini rohini"
+    # must not count twice. If the two disagreed, the ceiling would not bound
+    # the thing it claims to bound.
+    query_terms = list(dict.fromkeys(tokenize(query)))
+
+    strengths: list[TermStrength] = []
+    for term in query_terms:
+        postings = index.postings.get(term)
+        if postings is None:
+            strengths.append(TermStrength(term, 0, 0.0, 0.0, in_index=False))
+            continue
+        idf = inverse_document_frequency(index.doc_count, len(postings))
+        strengths.append(
+            TermStrength(term, len(postings), idf, idf * (K1 + 1), in_index=True)
+        )
+
+    return ScoreCeiling(
+        query=query,
+        terms=strengths,
+        ceiling=sum(strength.max_contribution for strength in strengths),
+    )
+
+
 @dataclass
 class TermCOntribution:
     """What one query term contributed to one document's score.

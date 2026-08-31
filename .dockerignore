@@ -1,0 +1,8 @@
+.venv/
+processed/
+Data/
+eval/responses/
+docs/
+__pycache__/
+*.pyc
+.git/

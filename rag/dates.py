@@ -23,6 +23,30 @@ MONTHS = {m: i for i, m in enumerate(
     ["january", "february", "march", "april", "may", "june", "july",
      "august", "september", "october", "november", "december"], start=1)}
 
+# Times of day the model copies along with the weekday. They narrow WHEN in the
+# day, never WHICH day, so dropping them loses nothing a date can carry.
+TIME_OF_DAY = re.compile(
+    r"\s+(night|morning|afternoon|evening|noon|midnight|early|late)\b")
+
+def first_weekday(phrase: str) -> str | None:
+    """The first weekday named in a phrase, or None.
+
+    F-076: three of ten incidents in a Rohini answer rendered as "we could not
+    resolve it" purely because WEEKDAYS is an exact dictionary lookup --
+    "saturday night", "friday night", "friday and saturday" all missed. The
+    model was copying the source correctly; the parser could not read it.
+
+    "friday and saturday" takes the FIRST. A range is not a date, and the
+    earlier bound is when the reported event began. Narrowing to one day is a
+    smaller claim than the source made, which is the safe direction -- unlike
+    D-011's trap, which invents precision the source never had.
+    """
+    cleaned = TIME_OF_DAY.sub("", phrase.strip().lower())
+    for word in re.findall(r"[a-z]+", cleaned):
+        if word in WEEKDAYS:
+            return word
+    return None
+
 def resolve_weekday(phrase: str, published: date) -> date | None:
     """"friday" -> the most recent Friday on or before the publication date.
 
@@ -30,11 +54,13 @@ def resolve_weekday(phrase: str, published: date) -> date | None:
     means two days ago, never the coming Friday. If the article is printed on
     the same weekday it names, that is the same day -- article 89719546 was
     printed on Monday 2022-02-21 and says "on Monday", meaning that morning.
+
+    Accepts "friday night" and "friday and saturday" via first_weekday.
     """
-    target = WEEKDAYS.get(phrase.strip().lower())
-    if target is None:
+    word = first_weekday(phrase)
+    if word is None:
         return None
-    days_back = (published.weekday() - target) % 7
+    days_back = (published.weekday() - WEEKDAYS[word]) % 7
     return published - timedelta(days=days_back)
 
 def resolve_month_day(phrase: str, published: date) -> date | None:
@@ -86,6 +112,13 @@ def resolve(
 
     resolved = resolve_weekday(text, published)
     if resolved:
-        return resolved, f"{text} before publication on {published}"
+        word = first_weekday(text)
+        if word == text:
+            return resolved, f"{text} before publication on {published}"
+        # The phrase was not a bare weekday -- "saturday night", "friday and
+        # saturday". Say so. A reader must be able to see the gap between what
+        # the source wrote and the date we printed (CLAUDE.md section 9).
+        return resolved, (f"source says {text!r}; read as {word} before "
+                          f"publication on {published}")
 
     return None, f"unrecognised phrase {incident_date!r}"

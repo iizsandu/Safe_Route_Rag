@@ -1,0 +1,96 @@
+# Place names for measuring the Gate 1 threshold (F-064).
+# One query per line. Blank lines and '#' comments are ignored.
+
+# --- Delhi / Bengaluru neighbourhoods: heavily sampled cities ---
+Rohini
+Vijay Vihar
+Whitefield
+Koramangala
+Indiranagar
+Saket
+Dwarka
+Karol Bagh
+Marathahalli
+Electronic City
+
+# --- whole cities: real places, but too broad to locate an incident ---
+Delhi
+Bengaluru
+Mumbai
+Noida
+Gurgaon
+Lucknow
+Patna
+Kochi
+Nagpur
+Coimbatore
+Kollam
+
+# --- generic words a user might actually type: must be blocked ---
+road
+market
+station
+main road
+bus stop
+city centre
+
+# --- HARDER generic terms: the real test of the threshold.
+# The six above are built from very common words and were always going to
+# fail, which makes them weak evidence. These are rarer infrastructure words
+# that a user would plausibly type and that still locate nothing. If any
+# lands above the lowest real neighbourhood (Vijay Vihar, 4.04), max(IDF)
+# does not separate the classes and the threshold is dead.
+flyover
+underpass
+subway
+metro station
+railway station
+petrol pump
+bus depot
+bus stand
+ring road
+service road
+market road
+bypass
+crossing
+junction
+chowk
+roundabout
+parking lot
+footpath
+highway
+toll plaza
+
+# --- rare token, ambiguous place: known blind spot, not a success ---
+MG Road
+
+# --- does naming the city help, or dilute the rare word? ---
+Rohini Delhi
+Whitefield Bengaluru
+
+# --- neighbourhoods from THINLY sampled cities (mined from the corpus).
+# These test whether the threshold transfers away from Delhi/Bengaluru.
+# UNVERIFIED: extracted mechanically, and nothing here distinguishes a place
+# name from a person's surname (F-047). Strike any that are not places.
+Peelamedu
+Vellalore
+Sirumugai
+Sowripalayam
+Puliyakulam
+Uppilipalayam
+Sivanandapuram
+Veerakeralam
+Vytilla
+Unichira
+Vazhakkulam
+Vattekunnam
+Vazhakala
+Sasthamcotta
+Sooranad
+Thazhuthala
+Sakthikulangara
+Puttingal
+Velichikala
+
+# --- should not exist in the corpus at all ---
+Zzyzx

@@ -53,12 +53,18 @@ RECENT_MONTHS = 12
 
 def _summary(incidents: list[dict[str, Any]],
              published: dict[int, date], today: date) -> str:
-    """The shape of the answer in one line, counted rather than judged.
+    """The shape of the answer, counted rather than judged, with the recent
+    claims themselves visible -- not just their count.
 
     Written HERE, not by the model (D-018, and the user's choice). Counting is
     something code does exactly and a model does approximately, and every time
     this model was asked to do one more thing the rest got worse (F-063,
-    F-074).
+    F-074). Listing the recent claims is the same principle applied one step
+    further: the text is the model's own already-verified `claim`, joined to
+    its date by code -- never a new sentence asked of the model. Asking the
+    model to itself summarise "what happened recently" would put unverified
+    prose in front of a reader (D-018's whole point), for something code can
+    already do exactly from data verify.py has already checked.
 
     It says WHAT WAS REPORTED. It does not say whether the area is safe -- that
     would be a risk score built on newsroom coverage, which D-011 forbids and
@@ -72,31 +78,40 @@ def _summary(incidents: list[dict[str, Any]],
     for incident in incidents:
         sources = [s for s in (incident.get("sources") or []) if isinstance(s, int)]
         when = published.get(sources[0]) if sources else None
-        (recent if when and when >= cutoff else older).append(when)
+        if when and when >= cutoff:
+            recent.append((incident, when))
+        else:
+            older.append(when)
 
     if recent:
-        newest = max(w for w in recent if w)
-        lead = (f"<strong>{len(recent)} incident"
+        # Most recent first -- what changed lately is what a reader most
+        # wants to see without scrolling.
+        ordered = sorted(recent, key=lambda pair: pair[1], reverse=True)
+        items = "".join(
+            f"<li>{_when(incident, when)} &mdash; "
+            f"{html.escape(str(incident.get('claim') or '(no claim)'))}</li>"
+            for incident, when in ordered)
+        head = (f"<p class='summary'><strong>{len(recent)} incident"
                 f"{'s' if len(recent) != 1 else ''} reported in the last "
-                f"{RECENT_MONTHS} months</strong>, most recently "
-                f"{pretty(newest)}.")
+                f"{RECENT_MONTHS} months:</strong></p>"
+                f"<ul class='recent'>{items}</ul>")
     else:
         # The dangerous half of the question. Saying "nothing recent" invites
         # "so it is safe", and in this corpus that inference is unfounded --
         # roughly six real incidents a year for a MAJOR district (F-044), so
         # silence is the normal case. The sentence carries its own correction.
-        lead = (f"<strong>No incidents reported in the last "
-                f"{RECENT_MONTHS} months.</strong> That is not evidence the "
-                f"area is safe &mdash; most areas report nothing in most "
-                f"months.")
+        head = (f"<p class='summary'><strong>No incidents reported in the "
+                f"last {RECENT_MONTHS} months.</strong> That is not evidence "
+                f"the area is safe &mdash; most areas report nothing in most "
+                f"months.</p>")
 
     if older:
         years = sorted({w.year for w in older if w})
         span = f"{years[0]}" if len(years) == 1 else f"{years[0]}&ndash;{years[-1]}"
-        lead += (f" {len(older)} older incident"
-                 f"{'s' if len(older) != 1 else ''} ({span}).")
+        head += (f"<p class='older'>{len(older)} older incident"
+                 f"{'s' if len(older) != 1 else ''} ({span}).</p>")
 
-    return f"<p class='summary'>{lead}</p>"
+    return head
 
 def _incident(number: int, incident: dict[str, Any],
               published: dict[int, date], articles: dict[int, dict]) -> str:

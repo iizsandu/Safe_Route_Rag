@@ -31,6 +31,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 from rag.articles import connect as connect_articles
 from rag.embed import load_model
@@ -74,40 +75,315 @@ async def lifespan(_: FastAPI):
     state.clear()
 
 app = FastAPI(title="Safe Route", lifespan=lifespan)
+app.mount("/static", StaticFiles(directory="rag/static"), name="static")
 
 PAGE = """<!doctype html>
-<meta charset="utf-8"><title>Safe Route</title>
-<style>
- body {{ font: 16px/1.6 system-ui, sans-serif; max-width: 44rem;
-        margin: 3rem auto; padding: 0 1rem; color: #1a1a1a; }}
- h1 {{ font-size: 1.6rem; }}
- h2 {{ font-size: 1.2rem; margin: 2.4rem 0 .2rem; }}
- h3 {{ font-size: 1rem; font-weight: 600; margin: 0 0 .2rem; }}
- input {{ font: inherit; padding: .55rem .7rem; width: 26rem; }}
- button {{ font: inherit; padding: .55rem 1.1rem; }}
- article {{ border-top: 1px solid #e6e6e6; padding: 1rem 0; }}
- .meta {{ margin: 0; color: #555; font-size: .92rem; }}
- .src {{ margin: .35rem 0 0; font-size: .92rem; }}
- .src a {{ color: #1a4f9c; }}
- .sub {{ color: #666; font-size: .9rem; margin: 0; }}
- .dim {{ color: #888; border-bottom: 1px dotted #bbb; cursor: help; }}
- time {{ border-bottom: 1px dotted #bbb; cursor: help; }}
- .caveat {{ margin-top: 2rem; padding: .9rem 1rem; background: #f7f7f7;
-            border-left: 3px solid #ccc; color: #444; font-size: .92rem; }}
- .none {{ font-size: 1rem; }}
- .stop {{ color: #a11; }}
- .summary {{ font-size: 1.08rem; margin: 1rem 0 1.2rem; }}
- details {{ border-top: 1px solid #e6e6e6; padding-top: .6rem; }}
- summary {{ cursor: pointer; color: #1a4f9c; font-size: .95rem; }}
- details article:first-of-type {{ border-top: none; }}
-</style>
-<h1>Safe Route</h1>
-<form method="post" action="/ask">
-  <input name="question" placeholder="Is it safe around Rohini, Delhi?"
-         value="{question}" required autofocus>
-  <button>Ask</button>
-</form>
-{body}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Safe Route</title>
+  <style>
+    :root {{
+      --ink: #f0e7d5;
+      --muted: #aaa18f;
+      --navy: #07121b;
+      --amber: #d5a45b;
+      --line: rgba(213, 164, 91, 0.55);
+    }}
+
+    * {{ box-sizing: border-box; }}
+
+    body {{
+      margin: 0;
+      min-height: 100vh;
+      background: var(--navy);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+    }}
+
+    main {{
+      position: relative;
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      overflow: hidden;
+      padding: 2rem;
+      isolation: isolate;
+    }}
+
+    main::before {{
+      position: absolute;
+      z-index: -2;
+      inset: 0;
+      background: #07121b;
+      content: "";
+    }}
+
+    main::after {{
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      background-image: url("/static/india-archive-bg.png");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      content: "";
+      opacity: 0.14;
+      pointer-events: none;
+    }}
+
+    .hero {{
+      width: min(100%, 760px);
+      text-align: center;
+    }}
+
+    .wordmark {{
+      margin: 0 0 1.5rem;
+      color: var(--ink);
+      font-size: 1.55rem;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+    }}
+
+    .wordmark::after {{
+      display: block;
+      width: 2rem;
+      height: 1px;
+      margin: 0.9rem auto 0;
+      background: var(--amber);
+      content: "";
+    }}
+
+    h1 {{
+      max-width: 700px;
+      margin: 0 auto;
+      font-size: clamp(2.8rem, 7vw, 5.4rem);
+      font-weight: 400;
+      letter-spacing: -0.05em;
+      line-height: 0.98;
+    }}
+
+    .intro {{
+      margin: 1.25rem 0 2.25rem;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.25rem);
+    }}
+
+    form {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      width: min(100%, 600px);
+      margin: 0 auto;
+    }}
+
+    input {{
+      min-width: 0;
+      padding: 1rem 1.2rem;
+      border: 1px solid var(--line);
+      border-right: 0;
+      border-radius: 0;
+      background: rgba(7, 18, 27, 0.82);
+      color: var(--ink);
+      font: inherit;
+      font-size: 1rem;
+    }}
+
+    input::placeholder {{
+      color: #9e957f;
+    }}
+
+    input:focus {{
+      outline: 2px solid var(--amber);
+      outline-offset: 3px;
+    }}
+
+    button {{
+      padding: 1rem 1.6rem;
+      border: 1px solid var(--amber);
+      border-radius: 0;
+      background: var(--amber);
+      color: #15110b;
+      cursor: pointer;
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+    }}
+
+    button:hover {{
+      background: #e3b86f;
+    }}
+
+    .results {{
+      width: min(100%, 760px);
+      margin-top: 3rem;
+      color: var(--ink);
+      text-align: left;
+    }}
+
+    .results h2 {{
+      margin-top: 3rem;
+      font-size: 1.7rem;
+      font-weight: 400;
+    }}
+
+    .results article {{
+      padding: 1.2rem 0;
+      border-top: 1px solid rgba(240, 231, 213, 0.18);
+    }}
+
+    .results a {{
+      color: var(--amber);
+    }}
+
+    .results .caveat {{
+      margin-top: 2rem;
+      padding: 1rem;
+      border-left: 2px solid var(--amber);
+      color: var(--muted);
+    }}
+
+    .results .stop {{
+      color: #e2b3a8;
+    }}
+
+    .tutorial {{
+      max-width: 640px;
+      margin: 0 auto 2rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }}
+
+    .tutorial p {{
+      margin: 0 0 0.6rem;
+      line-height: 1.7;
+    }}
+
+    .chip {{
+      padding: 0;
+      border: none;
+      background: none;
+      color: var(--amber);
+      font: inherit;
+      font-size: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+    }}
+
+    .chip:hover {{
+      color: #e3b86f;
+    }}
+
+    .tutorial-hide {{
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.35rem 0.9rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }}
+
+    .tutorial-hide:hover {{
+      border-color: var(--amber);
+      color: var(--amber);
+    }}
+
+    @media (max-width: 560px) {{
+      main {{
+        padding: 1.5rem;
+      }}
+
+      form {{
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }}
+
+      input {{
+        border-right: 1px solid var(--line);
+      }}
+    }}
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="wordmark">Safe Route</p>
+
+      <h1>A small step in making India Crime Aware.</h1>
+
+      <p class="intro">
+        Which place would you like to know more about?
+      </p>
+
+      <div id="tutorial-box" class="tutorial" style="display:none;">
+        <p>New here? Try
+          <button type="button" class="chip"
+                  data-question="Is it safe around Rohini, Delhi?">Rohini, Delhi</button>,
+          <button type="button" class="chip"
+                  data-question="Is it safe around Sultanpur, Delhi?">Sultanpur, Delhi</button>,
+          or
+          <button type="button" class="chip"
+                  data-question="Rohini, Delhi to Saket, Delhi">a route</button>.
+        </p>
+        <button type="button" id="tutorial-close"
+                class="tutorial-hide">Hide this</button>
+      </div>
+      <script>
+        (function () {{
+          var box = document.getElementById('tutorial-box');
+          if (!box) return;
+          if (!localStorage.getItem('saferoute_tutorial_seen')) {{
+            box.style.display = 'block';
+          }}
+          var input = document.getElementById('question');
+          var chips = box.querySelectorAll('.chip');
+          for (var i = 0; i < chips.length; i++) {{
+            chips[i].addEventListener('click', function (event) {{
+              if (input) {{
+                input.value = event.target.getAttribute('data-question');
+                input.focus();
+              }}
+            }});
+          }}
+          var hide = document.getElementById('tutorial-close');
+          if (hide) {{
+            hide.addEventListener('click', function () {{
+              box.style.display = 'none';
+              try {{
+                localStorage.setItem('saferoute_tutorial_seen', '1');
+              }} catch (e) {{}}
+            }});
+          }}
+        }})();
+      </script>
+
+      <form method="post" action="/ask">
+        <input
+          id="question"
+          name="question"
+          type="text"
+          value="{question}"
+          placeholder="Search an area or route"
+          required
+          autofocus
+        >
+        <button type="submit">Search</button>
+      </form>
+    </section>
+
+    <section class="results" aria-live="polite">
+      <!-- RESULTS INSERT HERE -->
+      {body}
+    </section>
+  </main>
+</body>
+</html>
 """
 
 # One block of copy, two refusals. They have different causes -- no place at

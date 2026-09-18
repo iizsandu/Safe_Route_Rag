@@ -1,8 +1,8 @@
 # Safe Route
 
-**A small step in making India crime aware.**
+**A small step in making India crime-aware.**
 
-**Live demo:** [saferoute.sandipshaw.online](https://saferoute.sandipshaw.online)
+**Live demo:** [saferoute.sandipshaw.online](https://safe-route-rag-5rrfeinpma-el.a.run.app/)
 
 Safe Route answers one question: has anyone been murdered or seriously
 assaulted near this place? It's a RAG system over Indian crime news (Times of
@@ -114,7 +114,7 @@ popular tool. 90% overlap on top-10 results.
 ## Limitations
 
 - No entity resolution. A surname can match several unrelated people.
-- One publisher. No cross-source corroboration is possible with this data.
+- One publisher. This data allows no cross-source corroboration.
 - Publication date isn't incident date. The system resolves in-article date
   references where it can and says "not stated" when it can't. It doesn't
   guess.
